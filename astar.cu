@@ -6,7 +6,19 @@
 #include <cstdio>
 #include <ctime>
 #include <vector>;
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 
+#include <stdio.h>
+
+cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+
+// Dummy kernel
+__global__ void addKernel(int *c, const int *a, const int *b)
+{
+    int i = threadIdx.x;
+    c[i] = a[i] + b[i];
+}
 
 struct SimpleGrid {
   int ** grid;
@@ -36,7 +48,7 @@ struct pair_hash {
 
 std::unordered_map<std::pair<int, int>, std::pair<int, int>, pair_hash>
 astar(SimpleGrid grid, std::pair<int, int> start, std::pair<int, int> goal) {
-  
+
   // Item to be stored in PQ
   typedef std::pair<int, std::pair<int, int>> PQElement;
   // PQ definition
@@ -103,7 +115,7 @@ astar(SimpleGrid grid, std::pair<int, int> start, std::pair<int, int> goal) {
 }
 
 
-void drawGrid(SimpleGrid grid, std::pair<int, int> goal, 
+void drawGrid(SimpleGrid grid, std::pair<int, int> goal,
   std::unordered_map<std::pair<int, int>, std::pair<int, int>, pair_hash> parents) {
   std::pair<int, int> current = goal;
   do {
@@ -164,7 +176,7 @@ int main() {
   duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
   std::cout << "Duration: " << duration << " seconds\n";
-  
+
   drawGrid(simpleGrid, std::make_pair(9, 9), parents);
 
   std::unordered_map<std::pair<int, int>, std::pair<int, int>, pair_hash>().swap(parents);
